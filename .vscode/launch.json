@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug FastAPI service",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["app.main:create_app", "--factory", "--port", "8000"],
+      "cwd": "${workspaceFolder}/templates/ml-service",
+      "env": { "PYTHONPATH": "${workspaceFolder}/templates/src", "MODEL_DIR": "${workspaceFolder}/templates/models", "APP_ENV": "development" },
+      "justMyCode": true
+    },
+    {
+      "name": "Debug API tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "cwd": "${workspaceFolder}/templates/ml-service",
+      "justMyCode": false
+    }
+  ]
+}

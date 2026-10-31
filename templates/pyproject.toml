@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mlkit"
+version = "1.0.0"
+description = "Importable atoms for the data-mining-ml templates: transformers, features, metrics, persistence, explanations and the grounded RTCC explainer."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+  "numpy>=1.26",
+  "pandas>=2.1",
+  "scikit-learn>=1.6",
+  "scipy>=1.11",
+]
+
+[project.optional-dependencies]
+notebooks = ["matplotlib>=3.8", "ipywidgets>=8.1", "imbalanced-learn>=0.12", "jupytext>=1.16"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+mlkit = ["prompts/*.md", "prompts/*.json"]

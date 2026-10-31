@@ -1,0 +1,12 @@
+# Notebook environment, pinned to the versions the templates were verified with.
+numpy==2.4.6
+pandas==3.0.3
+scikit-learn==1.9.0
+scipy==1.17.1
+imbalanced-learn==0.14.2
+matplotlib==3.11.0
+ipywidgets==8.1.9
+jupytext==1.19.6
+nbconvert==7.17.2
+ipykernel==7.3.0
+statsmodels==0.15.0

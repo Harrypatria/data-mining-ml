@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RTCC explainer context",
+  "description": "The only facts the explainer LLM may use. Built and filled by the server; clients never supply explanation values.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["model_card", "baseline_profile", "scenario_profile", "changed_predictors", "predictions", "shap_local",
+               "global_importance", "training_ranges", "extrapolation_flags", "calibration_note", "what_if", "recent_chat_history"],
+  "properties": {
+    "model_card": {
+      "type": "object",
+      "required": ["purpose", "target", "metric", "threshold", "limitations"],
+      "properties": {
+        "purpose": {"type": "string", "maxLength": 500},
+        "target": {"type": "string"},
+        "target_label": {"type": "string"},
+        "task": {"type": "string", "enum": ["binary_classification", "regression"]},
+        "model_version": {"type": "string"},
+        "metric": {"type": "object", "additionalProperties": {"type": ["number", "string", "null"]}},
+        "threshold": {"type": ["number", "null"]},
+        "limitations": {"type": "array", "maxItems": 10, "items": {"type": "string", "maxLength": 400}},
+        "features": {"type": "array", "items": {"type": "object", "required": ["feature", "label"],
+                     "properties": {"feature": {"type": "string"}, "label": {"type": "string"}, "unit": {"type": "string"}}}}
+      }
+    },
+    "baseline_profile": {"type": "object", "additionalProperties": {"type": ["number", "string", "boolean", "null"]}},
+    "scenario_profile": {"type": "object", "additionalProperties": {"type": ["number", "string", "boolean", "null"]}},
+    "changed_predictors": {
+      "type": "array", "maxItems": 50,
+      "items": {"type": "object", "additionalProperties": false, "required": ["name", "old", "new", "unit"],
+                "properties": {"name": {"type": "string"}, "old": {"type": ["number", "string", "boolean", "null"]},
+                               "new": {"type": ["number", "string", "boolean", "null"]}, "unit": {"type": "string"}}}
+    },
+    "predictions": {
+      "type": "object", "additionalProperties": false, "required": ["baseline", "scenario"],
+      "properties": {
+        "baseline": {"type": "object", "required": ["value", "probability", "label"],
+                     "properties": {"value": {"type": ["number", "null"]}, "probability": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+                                    "label": {"type": ["string", "integer", "null"]}}},
+        "scenario": {"type": "object", "required": ["value", "probability", "label"],
+                     "properties": {"value": {"type": ["number", "null"]}, "probability": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+                                    "label": {"type": ["string", "integer", "null"]}}}
+      }
+    },
+    "shap_local": {
+      "type": "object", "additionalProperties": false, "required": ["baseline", "scenario"],
+      "properties": {
+        "baseline": {"type": "array", "items": {"type": "object", "required": ["feature", "value", "contribution", "direction"],
+                     "properties": {"feature": {"type": "string"}, "value": {"type": ["number", "string", "boolean", "null"]},
+                                    "contribution": {"type": "number"}, "direction": {"type": "string", "enum": ["raises", "lowers", "no effect"]}}}},
+        "scenario": {"type": "array", "items": {"type": "object", "required": ["feature", "value", "contribution", "direction"],
+                     "properties": {"feature": {"type": "string"}, "value": {"type": ["number", "string", "boolean", "null"]},
+                                    "contribution": {"type": "number"}, "direction": {"type": "string", "enum": ["raises", "lowers", "no effect"]}}}}
+      }
+    },
+    "global_importance": {"type": "array", "maxItems": 100,
+                          "items": {"type": "object", "required": ["feature", "importance"],
+                                    "properties": {"feature": {"type": "string"}, "importance": {"type": "number"}}}},
+    "training_ranges": {"type": "object", "additionalProperties": {"type": "object"}},
+    "extrapolation_flags": {"type": "object", "additionalProperties": {"type": "boolean"}},
+    "calibration_note": {"type": "string", "maxLength": 500},
+    "what_if": {"type": "array", "maxItems": 10,
+                "items": {"type": "object", "required": ["feature", "from", "to", "prediction"],
+                          "properties": {"feature": {"type": "string"}, "from": {"type": ["number", "string", "boolean", "null"]},
+                                         "to": {"type": ["number", "string", "boolean", "null"]}, "prediction": {"type": "number"},
+                                         "distance": {"type": "number"}}}},
+    "recent_chat_history": {"type": "array", "maxItems": 4,
+                            "items": {"type": "object", "additionalProperties": false, "required": ["role", "content"],
+                                      "properties": {"role": {"type": "string", "enum": ["user", "assistant"]},
+                                                     "content": {"type": "string", "maxLength": 2000}}}}
+  }
+}

@@ -1,0 +1,208 @@
+#!/usr/bin/env python3
+"""data-mining-ml command line. Standard library only.
+
+  data-mining-ml scan PATH... [--imbalanced] [--format json]   scan for analysis and production slop
+  data-mining-ml check                                         verify the plugin repository (manifests, notebooks, budgets, prompts, secrets)
+  data-mining-ml prompt TARGET                                 print a generated platform prompt
+  data-mining-ml init --target agents|cursor|replit|claude-project|ai-studio [--dir DIR]
+  data-mining-ml init --project DIR [--package NAME]           scaffold notebooks, src, models, api, web, compose
+  data-mining-ml notebook-run NOTEBOOK... [--out DIR]          execute notebooks from a clean kernel
+  data-mining-ml verify-model MODEL_DIR                        verify a model bundle without unpickling it
+"""
+from __future__ import annotations
+
+import json
+import re
+import shutil
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts"))
+
+TARGET_FILES = {
+    "agents": "AGENTS.md",
+    "cursor": ".cursor/rules/data-mining-ml.mdc",
+    "replit": "replit.md",
+    "claude-project": "claude-project-instructions.md",
+    "ai-studio": "ai-studio-system-instructions.md",
+}
+NOTEBOOK_NAMES = {
+    "crisp_template": "01_crisp_end_to_end",
+    "imbalance_lab": "02_imbalance_lab",
+    "train_test_save": "03_train_test_save",
+    "whatif_dashboard": "04_whatif_dashboard",
+    "story_report": "05_story_report",
+    "llm_explainer_demo": "06_llm_explainer_demo",
+}
+SKIP = shutil.ignore_patterns("node_modules", "dist", "__pycache__", ".pytest_cache", ".ipynb_checkpoints", "*.pyc", ".env")
+TEXT_SUFFIXES = {".py", ".ipynb", ".toml", ".md", ".txt", ".ini", ".cfg", ".json", ".yml", ".yaml"}
+
+
+def cmd_init(args: list[str]) -> int:
+    import gen_prompts
+
+    opts = dict(zip(args[::2], args[1::2]))
+    if "--target" in opts:
+        target = opts["--target"]
+        if target not in TARGET_FILES:
+            print(f"unknown target {target}; choose from {', '.join(TARGET_FILES)}")
+            return 2
+        out = Path(opts.get("--dir", ".")) / TARGET_FILES[target]
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(gen_prompts.render("ai-studio" if target == "ai-studio" else target), encoding="utf-8", newline="\n")
+        print(f"wrote {out}")
+        return 0
+    if "--project" not in opts:
+        print(__doc__)
+        return 2
+    return scaffold(Path(opts["--project"]), opts.get("--package", "mlkit"))
+
+
+def scaffold(dest: Path, package: str) -> int:
+    if not re.fullmatch(r"[a-z_][a-z0-9_]*", package):
+        print("package must be a lowercase Python identifier")
+        return 2
+    if dest.exists() and any(dest.iterdir()):
+        print(f"{dest} is not empty; choose a new folder so nothing is overwritten")
+        return 1
+    t = ROOT / "templates"
+    dest.mkdir(parents=True, exist_ok=True)
+    shutil.copytree(t / "src" / "mlkit", dest / "src" / package, ignore=SKIP)
+    shutil.copytree(t / "ml-service", dest / "api", ignore=SKIP)
+    shutil.copytree(t / "prompts", dest / "api" / "app" / "prompts")
+    shutil.copytree(t / "ml-web", dest / "web", ignore=SKIP)
+    (dest / "notebooks").mkdir()
+    for old, new in NOTEBOOK_NAMES.items():
+        for suffix in (".ipynb", ".py"):
+            shutil.copy2(t / "notebooks" / f"{old}{suffix}", dest / "notebooks" / f"{new}{suffix}")
+    shutil.copy2(t / "notebooks" / "percent_template.py", dest / "notebooks" / "percent_template.py")
+    for name in ("docker-compose.yml", ".env.example", "requirements-notebooks.txt", "README.md"):
+        shutil.copy2(t / "project" / name, dest / name)
+    shutil.copy2(t / "pyproject.toml", dest / "pyproject.toml")
+    manifest = (ROOT / "skills" / "problem-framing" / "references" / "manifest-template.md").read_text(encoding="utf-8")
+    body = manifest.split("```markdown\n", 1)[1].rsplit("```", 1)[0]
+    (dest / "ANALYSIS_MANIFEST.md").write_text(body, encoding="utf-8")
+    for folder, note in (("models", "Model bundles: models/v<semver>/ plus CURRENT. Mounted read-only into the API."),
+                         ("artifacts", "feature_dictionary.csv, insights.json, data_sheet.md written by the notebooks."),
+                         ("vendor", "Optional offline wheels for air-gapped Docker builds (pip download -r api/requirements.txt -d vendor/).")):
+        (dest / folder).mkdir(exist_ok=True)
+        (dest / folder / "README.md").write_text(note + "\n", encoding="utf-8")
+    (dest / ".gitignore").write_text(".env\n.venv/\n__pycache__/\n.ipynb_checkpoints/\nweb/node_modules/\nweb/dist/\nmodels/v*/\n", encoding="utf-8")
+    if package != "mlkit":
+        for f in dest.rglob("*"):
+            if f.is_file() and f.suffix in TEXT_SUFFIXES and "node_modules" not in f.parts:
+                text = f.read_text(encoding="utf-8")
+                if "mlkit" in text:
+                    f.write_text(re.sub(r"\bmlkit\b", package, text), encoding="utf-8", newline="\n")
+    print(f"scaffolded {dest} with package {package}")
+    print("next: pip install -e . && python -m pip install -r requirements-notebooks.txt; open notebooks/01_crisp_end_to_end.ipynb")
+    return 0
+
+
+def cmd_check(_: list[str]) -> int:
+    import check_budget
+    import gen_prompts
+    import ml_scan
+    import notebook_tools
+
+    failures = []
+
+    def section(name: str, problems: list[str]):
+        print(f"{'ok  ' if not problems else 'FAIL'} {name}")
+        for p in problems[:20]:
+            print(f"     {p}")
+        failures.extend(problems)
+
+    json_problems = []
+    for f in sorted(ROOT.rglob("*.json")):
+        if any(part in ("node_modules", "dist") for part in f.parts):
+            continue
+        try:
+            json.loads(f.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+            json_problems.append(f"{f.relative_to(ROOT)}: {exc}")
+    section("JSON files parse", json_problems)
+
+    nb_problems = []
+    for nb in sorted((ROOT / "templates").rglob("*.ipynb")) + sorted((ROOT / "tests").rglob("*.ipynb")):
+        if "node_modules" in nb.parts:
+            continue
+        nb_problems += [f"{nb.relative_to(ROOT)}: {p}" for p in notebook_tools.validate_nb(json.loads(nb.read_text(encoding="utf-8")))]
+    section("notebooks valid (nbformat 4 structure, every code cell parses)", nb_problems)
+
+    pair_problems = []
+    for py in sorted((ROOT / "templates" / "notebooks").glob("*.py")):
+        if notebook_tools._is_percent(py):
+            expected = notebook_tools.dumps(notebook_tools.py_to_nb(py.read_text(encoding="utf-8"), py.stem))
+            target = py.with_suffix(".ipynb")
+            if not target.is_file() or target.read_text(encoding="utf-8") != expected:
+                pair_problems.append(f"{target.relative_to(ROOT)} out of date with {py.name}")
+    section("paired notebooks in sync with percent files", pair_problems)
+
+    section("skill frontmatter and token budgets", check_budget.check(ROOT, 1800))
+
+    stale = [p.relative_to(ROOT).as_posix() for p, text in gen_prompts.outputs().items()
+             if not p.is_file() or p.read_text(encoding="utf-8") != text]
+    section("generated prompts match adapters", stale)
+
+    sloppy = ml_scan.run([str(ROOT / "tests" / "fixtures" / "sloppy")])
+    clean = ml_scan.run([str(ROOT / "tests" / "fixtures" / "clean")])
+    scan_problems = []
+    if not any(f.severity == "error" for f in sloppy):
+        scan_problems.append("scanner found no errors in tests/fixtures/sloppy")
+    scan_problems += [f"clean fixture error: {f.path} {f.loc} {f.rule}" for f in clean if f.severity == "error"]
+    section(f"scanner on fixtures ({len(ml_scan.RULES)} rules)", scan_problems)
+
+    authored = [p for p in ROOT.rglob("*") if p.is_file() and p.suffix in {".md", ".py", ".ts", ".tsx", ".json", ".yml", ".css", ".html", ""}
+                and not any(part in ("node_modules", "dist", ".git", "__pycache__") for part in p.parts) and p.name != "schema.d.ts"]
+    style, secrets = [], []
+    emoji = re.compile("[" + chr(0x1F300) + "-" + chr(0x1FAFF) + chr(0x2600) + "-" + chr(0x27BF) + "]")
+    key = re.compile(r"\bsk-(?:ant-|proj-)?[A-Za-z0-9_\-]{20,}")
+    for p in authored:
+        try:
+            text = p.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
+        if chr(0x2014) in text or emoji.search(text):
+            style.append(f"{p.relative_to(ROOT)}: em dash or emoji")
+        if key.search(text):
+            secrets.append(f"{p.relative_to(ROOT)}: key-shaped string")
+    web_dist = ROOT / "templates" / "ml-web" / "dist"
+    if web_dist.is_dir():
+        for p in web_dist.rglob("*.js"):
+            if key.search(p.read_text(encoding="utf-8", errors="ignore")) or re.search(r"VITE_\w*(KEY|SECRET)", p.read_text(encoding="utf-8", errors="ignore")):
+                secrets.append(f"{p.relative_to(ROOT)}: secret in front-end bundle")
+    section("no em dashes or emojis in authored files", style)
+    section("no API keys in files or the front-end bundle", secrets)
+    print("check: passed" if not failures else f"check: {len(failures)} problems")
+    return 1 if failures else 0
+
+
+def main(argv: list[str]) -> int:
+    if not argv or argv[0] in ("-h", "--help"):
+        print(__doc__)
+        return 0
+    cmd, rest = argv[0], argv[1:]
+    if cmd == "scan":
+        import ml_scan
+        return ml_scan.main(rest)
+    if cmd == "check":
+        return cmd_check(rest)
+    if cmd == "prompt":
+        import gen_prompts
+        return gen_prompts.main(["--print", *rest])
+    if cmd == "init":
+        return cmd_init(rest)
+    if cmd == "notebook-run":
+        import notebook_run
+        return notebook_run.main(rest)
+    if cmd == "verify-model":
+        import verify_model
+        return verify_model.main(rest)
+    print(__doc__)
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

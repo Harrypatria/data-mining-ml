@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "ml: scan project", "type": "shell", "command": "python scripts/ml_scan.py templates tests/fixtures/clean", "problemMatcher": [] },
+    { "label": "ml: scan current file", "type": "shell", "command": "python scripts/ml_scan.py \"${file}\"", "problemMatcher": [] },
+    { "label": "ml: clean-execute notebooks", "type": "shell", "command": "python scripts/notebook_run.py templates/notebooks", "problemMatcher": [] },
+    { "label": "ml: plugin check", "type": "shell", "command": "python bin/data-mining-ml check", "problemMatcher": [] },
+    { "label": "api: start (development)", "type": "shell", "isBackground": true,
+      "command": "uvicorn app.main:create_app --factory --reload --port 8000",
+      "options": { "cwd": "${workspaceFolder}/templates/ml-service", "env": { "PYTHONPATH": "../src", "MODEL_DIR": "../models", "APP_ENV": "development" } },
+      "problemMatcher": [] },
+    { "label": "api: tests", "type": "shell", "command": "python -m pytest", "options": { "cwd": "${workspaceFolder}/templates/ml-service" }, "problemMatcher": [] },
+    { "label": "web: dev server", "type": "shell", "isBackground": true, "command": "npm run dev", "options": { "cwd": "${workspaceFolder}/templates/ml-web" }, "problemMatcher": [] },
+    { "label": "web: typecheck, test, build", "type": "shell", "command": "npm run typecheck && npm test && npm run build", "options": { "cwd": "${workspaceFolder}/templates/ml-web" }, "problemMatcher": [] }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "data-mining-ml",
+  "version": "1.0.0",
+  "description": "Data Mining and Machine Learning Skill. Turns Claude into a notebook-first data science and ML engineering partner: CRISP-DM workflow, statistical rigor, leakage-safe pipelines, imbalance-aware evaluation, explainable AI, pickle persistence, a FastAPI prediction service, a React what-if workbench and a grounded LLM prediction explainer. Ships 17 skills, a zero-dependency scanner with 79 detected rules, a self-correcting hook and the ml-critic reviewer agent.",
+  "author": { "name": "Harry Patria" },
+  "license": "MIT",
+  "homepage": "https://github.com/Harrypatria/data-mining-ml",
+  "repository": "https://github.com/Harrypatria/data-mining-ml",
+  "keywords": [
+    "machine-learning", "data-science", "data-mining", "predictive-modeling", "classification",
+    "regression", "clustering", "forecasting", "model-deployment", "explainable-ai", "crisp-dm",
+    "jupyter", "colab", "fastapi", "react", "statistics"
+  ]
+}

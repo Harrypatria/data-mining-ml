@@ -1,0 +1,386 @@
+{
+  "$meta": {
+    "name": "ml-workbench",
+    "version": "1.0.0",
+    "source": "Tastemaker starter adapted: ink-graphite primary so color is reserved for data; IBM Plex for unambiguous digits."
+  },
+  "primitive": {
+    "color": {
+      "white": "#FFFFFF",
+      "neutral": {
+        "50": "#F7F8FA",
+        "100": "#EEF0F3",
+        "200": "#DDE1E7",
+        "300": "#C3C9D2",
+        "400": "#98A1AE",
+        "500": "#6B7482",
+        "600": "#515966",
+        "700": "#3C434E",
+        "800": "#262B33",
+        "900": "#171B21",
+        "950": "#0E1116"
+      },
+      "primary": {
+        "50": "#F3F5F7",
+        "100": "#E3E8ED",
+        "200": "#C7D0D9",
+        "300": "#A0AEBB",
+        "400": "#74869A",
+        "500": "#52657A",
+        "600": "#2F3E4E",
+        "700": "#243140",
+        "800": "#1A2430",
+        "900": "#121A23",
+        "950": "#0B1118"
+      },
+      "success": {
+        "50": "#ECFDF3",
+        "200": "#ABEFC6",
+        "400": "#47CD89",
+        "600": "#157F3B",
+        "950": "#053321"
+      },
+      "warning": {
+        "50": "#FFFAEB",
+        "200": "#FEDF89",
+        "400": "#FDB022",
+        "600": "#B54708",
+        "950": "#4E1D09"
+      },
+      "danger": {
+        "50": "#FEF3F2",
+        "200": "#FECDCA",
+        "400": "#F97066",
+        "600": "#B42318",
+        "950": "#55160C"
+      },
+      "info": {
+        "50": "#EFF8FF",
+        "200": "#B2DDFF",
+        "400": "#53B1FD",
+        "600": "#175CD3",
+        "950": "#102A56"
+      },
+      "data": {
+        "1": "#0072B2",
+        "2": "#E69F00",
+        "3": "#009E73",
+        "4": "#D55E00",
+        "5": "#CC79A7",
+        "6": "#56B4E9"
+      }
+    },
+    "space": {
+      "0": "0px",
+      "1": "4px",
+      "2": "8px",
+      "3": "12px",
+      "4": "16px",
+      "5": "20px",
+      "6": "24px",
+      "8": "32px",
+      "10": "40px",
+      "12": "48px",
+      "16": "64px",
+      "20": "80px",
+      "24": "96px"
+    },
+    "radius": {
+      "none": "0px",
+      "sm": "4px",
+      "md": "8px",
+      "lg": "12px",
+      "xl": "16px",
+      "full": "9999px"
+    },
+    "font": {
+      "family": {
+        "sans": "\"IBM Plex Sans\", ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", Roboto, sans-serif",
+        "mono": "\"IBM Plex Mono\", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+      },
+      "size": {
+        "xs": "12px",
+        "sm": "14px",
+        "md": "16px",
+        "lg": "18px",
+        "xl": "20px",
+        "2xl": "24px",
+        "3xl": "30px",
+        "4xl": "36px",
+        "5xl": "48px",
+        "6xl": "60px"
+      },
+      "weight": {
+        "regular": "400",
+        "medium": "500",
+        "semibold": "600",
+        "bold": "700"
+      },
+      "leading": {
+        "tight": "1.2",
+        "snug": "1.4",
+        "normal": "1.5",
+        "relaxed": "1.6"
+      }
+    },
+    "shadow": {
+      "sm": "0 1px 2px 0 rgb(14 17 22 / 0.06)",
+      "md": "0 4px 12px -2px rgb(14 17 22 / 0.10)",
+      "lg": "0 12px 32px -8px rgb(14 17 22 / 0.18)"
+    },
+    "duration": {
+      "instant": "80ms",
+      "fast": "150ms",
+      "base": "200ms",
+      "slow": "300ms"
+    },
+    "easing": {
+      "standard": "cubic-bezier(.2,0,0,1)",
+      "enter": "cubic-bezier(0,0,0,1)",
+      "exit": "cubic-bezier(.3,0,1,1)"
+    },
+    "z": {
+      "base": "0",
+      "sticky": "10",
+      "dropdown": "20",
+      "overlay": "30",
+      "modal": "40",
+      "toast": "50"
+    }
+  },
+  "semantic": {
+    "light": {
+      "color": {
+        "bg": {
+          "canvas": "{primitive.color.neutral.50}",
+          "surface": "{primitive.color.white}",
+          "surface-raised": "{primitive.color.white}",
+          "surface-sunken": "{primitive.color.neutral.100}",
+          "overlay": "{primitive.color.neutral.950}",
+          "inverse": "{primitive.color.neutral.900}"
+        },
+        "text": {
+          "default": "{primitive.color.neutral.900}",
+          "muted": "{primitive.color.neutral.600}",
+          "subtle": "{primitive.color.neutral.500}",
+          "disabled": "{primitive.color.neutral.400}",
+          "on-primary": "{primitive.color.white}",
+          "on-inverse": "{primitive.color.neutral.50}",
+          "link": "{primitive.color.primary.600}",
+          "danger": "{primitive.color.danger.600}"
+        },
+        "border": {
+          "default": "{primitive.color.neutral.200}",
+          "strong": "{primitive.color.neutral.500}",
+          "subtle": "{primitive.color.neutral.100}",
+          "focus": "{primitive.color.primary.500}"
+        },
+        "action": {
+          "primary": "{primitive.color.primary.600}",
+          "primary-hover": "{primitive.color.primary.700}",
+          "secondary": "{primitive.color.neutral.100}",
+          "secondary-hover": "{primitive.color.neutral.200}",
+          "destructive": "{primitive.color.danger.600}"
+        },
+        "status": {
+          "success": "{primitive.color.success.600}",
+          "success-bg": "{primitive.color.success.50}",
+          "success-border": "{primitive.color.success.200}",
+          "warning": "{primitive.color.warning.600}",
+          "warning-bg": "{primitive.color.warning.50}",
+          "warning-border": "{primitive.color.warning.200}",
+          "danger": "{primitive.color.danger.600}",
+          "danger-bg": "{primitive.color.danger.50}",
+          "danger-border": "{primitive.color.danger.200}",
+          "info": "{primitive.color.info.600}",
+          "info-bg": "{primitive.color.info.50}",
+          "info-border": "{primitive.color.info.200}"
+        },
+        "data": {
+          "series-1": "{primitive.color.data.1}",
+          "series-2": "{primitive.color.data.2}",
+          "series-3": "{primitive.color.data.3}",
+          "series-4": "{primitive.color.data.4}",
+          "series-5": "{primitive.color.data.5}",
+          "series-6": "{primitive.color.data.6}",
+          "highlight": "{primitive.color.primary.600}",
+          "grid": "{primitive.color.neutral.200}",
+          "raises": "{primitive.color.data.4}",
+          "lowers": "{primitive.color.data.1}",
+          "band": "{primitive.color.neutral.100}"
+        }
+      }
+    },
+    "dark": {
+      "color": {
+        "bg": {
+          "canvas": "{primitive.color.neutral.950}",
+          "surface": "{primitive.color.neutral.900}",
+          "surface-raised": "{primitive.color.neutral.800}",
+          "surface-sunken": "{primitive.color.neutral.900}",
+          "overlay": "{primitive.color.neutral.950}",
+          "inverse": "{primitive.color.neutral.50}"
+        },
+        "text": {
+          "default": "{primitive.color.neutral.100}",
+          "muted": "{primitive.color.neutral.400}",
+          "subtle": "{primitive.color.neutral.500}",
+          "disabled": "{primitive.color.neutral.600}",
+          "on-primary": "{primitive.color.neutral.950}",
+          "on-inverse": "{primitive.color.neutral.900}",
+          "link": "{primitive.color.primary.300}",
+          "danger": "{primitive.color.danger.400}"
+        },
+        "border": {
+          "default": "{primitive.color.neutral.800}",
+          "strong": "{primitive.color.neutral.500}",
+          "subtle": "{primitive.color.neutral.900}",
+          "focus": "{primitive.color.primary.400}"
+        },
+        "action": {
+          "primary": "{primitive.color.primary.300}",
+          "primary-hover": "{primitive.color.primary.200}",
+          "secondary": "{primitive.color.neutral.800}",
+          "secondary-hover": "{primitive.color.neutral.700}",
+          "destructive": "{primitive.color.danger.400}"
+        },
+        "status": {
+          "success": "{primitive.color.success.400}",
+          "success-bg": "{primitive.color.success.950}",
+          "success-border": "{primitive.color.success.600}",
+          "warning": "{primitive.color.warning.400}",
+          "warning-bg": "{primitive.color.warning.950}",
+          "warning-border": "{primitive.color.warning.600}",
+          "danger": "{primitive.color.danger.400}",
+          "danger-bg": "{primitive.color.danger.950}",
+          "danger-border": "{primitive.color.danger.600}",
+          "info": "{primitive.color.info.400}",
+          "info-bg": "{primitive.color.info.950}",
+          "info-border": "{primitive.color.info.600}"
+        },
+        "data": {
+          "series-1": "{primitive.color.data.6}",
+          "series-2": "{primitive.color.data.2}",
+          "series-3": "{primitive.color.data.3}",
+          "series-4": "{primitive.color.data.4}",
+          "series-5": "{primitive.color.data.5}",
+          "series-6": "{primitive.color.data.1}",
+          "highlight": "{primitive.color.primary.300}",
+          "grid": "{primitive.color.neutral.800}",
+          "raises": "{primitive.color.data.2}",
+          "lowers": "{primitive.color.data.6}",
+          "band": "{primitive.color.neutral.800}"
+        }
+      }
+    }
+  },
+  "component": {
+    "button": {
+      "primary": {
+        "bg": "{semantic.color.action.primary}",
+        "fg": "{semantic.color.text.on-primary}"
+      }
+    },
+    "input": {
+      "border": "{semantic.color.border.default}",
+      "border-focus": "{semantic.color.border.focus}"
+    }
+  },
+  "contrast": [
+    [
+      "text.default",
+      "bg.canvas",
+      4.5
+    ],
+    [
+      "text.default",
+      "bg.surface",
+      4.5
+    ],
+    [
+      "text.muted",
+      "bg.canvas",
+      4.5
+    ],
+    [
+      "text.muted",
+      "bg.surface",
+      4.5
+    ],
+    [
+      "text.muted",
+      "bg.surface-sunken",
+      4.5
+    ],
+    [
+      "text.on-primary",
+      "action.primary",
+      4.5
+    ],
+    [
+      "text.on-primary",
+      "action.primary-hover",
+      4.5
+    ],
+    [
+      "text.on-primary",
+      "action.destructive",
+      4.5
+    ],
+    [
+      "text.link",
+      "bg.surface",
+      4.5
+    ],
+    [
+      "text.danger",
+      "bg.surface",
+      4.5
+    ],
+    [
+      "status.success",
+      "status.success-bg",
+      4.5
+    ],
+    [
+      "status.warning",
+      "status.warning-bg",
+      4.5
+    ],
+    [
+      "status.danger",
+      "status.danger-bg",
+      4.5
+    ],
+    [
+      "status.info",
+      "status.info-bg",
+      4.5
+    ],
+    [
+      "border.focus",
+      "bg.surface",
+      3
+    ],
+    [
+      "border.strong",
+      "bg.surface",
+      3
+    ],
+    [
+      "data.raises",
+      "bg.surface",
+      3
+    ],
+    [
+      "data.lowers",
+      "bg.surface",
+      3
+    ],
+    [
+      "text.default",
+      "bg.surface-raised",
+      4.5
+    ]
+  ]
+}

@@ -1,0 +1,30 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./tailwind.v4.css";
+
+/* Extra semantic utilities used by the workbench; values come from tokens.css only. */
+@theme inline {
+  --color-warning-soft: var(--color-status-warning-bg);
+  --color-warning-line: var(--color-status-warning-border);
+  --color-danger-soft: var(--color-status-danger-bg);
+  --color-danger-line: var(--color-status-danger-border);
+  --color-info-soft: var(--color-status-info-bg);
+  --color-info-line: var(--color-status-info-border);
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  body {
+    @apply min-h-dvh bg-background text-sm text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

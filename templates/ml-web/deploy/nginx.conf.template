@@ -1,0 +1,25 @@
+# Rendered by the nginx image at start (envsubst): API_UPSTREAM and API_KEY come from the container environment.
+# The browser calls /api/...; nginx forwards to the FastAPI service and adds the API key, so no key reaches the client.
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+    client_max_body_size 64k;
+
+    add_header X-Content-Type-Options nosniff always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    add_header Content-Security-Policy "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'" always;
+
+    location /api/ {
+        proxy_pass ${API_UPSTREAM}/;
+        proxy_set_header X-API-Key "${API_KEY}";
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_buffering off;            # server-sent events stream through unbuffered
+        proxy_read_timeout 120s;
+    }
+
+    location / {
+        try_files $uri /index.html;
+    }
+}

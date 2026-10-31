@@ -1,0 +1,34 @@
+# Runs the FastAPI service and an nginx container serving the built React app.
+# The browser only talks to nginx; nginx proxies /api to the service and adds the API key server-side.
+services:
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    env_file: .env
+    environment:
+      MODEL_DIR: /srv/models
+      APP_ENV: production
+    volumes:
+      - ./models:/srv/models:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+    restart: unless-stopped
+    expose:
+      - "8000"
+
+  web:
+    build:
+      context: web
+      args:
+        VITE_API_URL: /api
+    environment:
+      API_UPSTREAM: http://api:8000
+      API_KEY: ${API_KEY:-}
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    restart: unless-stopped

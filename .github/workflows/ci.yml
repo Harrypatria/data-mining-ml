@@ -1,0 +1,75 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  plugin:
+    name: Budgets, prompts, scanner and rule tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Rule tests (standard library only)
+        run: python -m unittest discover -s tests -v
+      - name: Plugin check (JSON, notebooks, pairing, budgets, prompts, fixtures, secrets, style)
+        run: python bin/data-mining-ml check
+      - name: Scanner on clean templates
+        run: python scripts/ml_scan.py templates/notebooks templates/src templates/ml-service templates/prompts tests/fixtures/clean
+      - name: Scanner flags sloppy fixtures
+        run: "! python scripts/ml_scan.py tests/fixtures/sloppy --quiet"
+
+  notebooks:
+    name: Execute notebook templates from a clean kernel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r templates/project/requirements-notebooks.txt -e templates
+      - run: DMML_OUTPUT_DIR=$RUNNER_TEMP/out python scripts/notebook_run.py templates/notebooks --out $RUNNER_TEMP/executed
+
+  api:
+    name: FastAPI tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: templates/ml-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements-dev.txt -e ..
+      - run: python -m pytest
+
+  web:
+    name: Front end typecheck, tests, build, Tastemaker scan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: templates/ml-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: No secrets in the bundle
+        run: |
+          if grep -rEq '\bsk-[A-Za-z0-9_-]{20,}|VITE_[A-Z_]*(KEY|SECRET)|api\.openai\.com|api\.anthropic\.com' dist; then
+            echo "secret-like string or provider host found in the front-end bundle"; exit 1
+          fi
+      - name: Tastemaker scan (when available)
+        run: npx --yes tastemaker@1.0.0 scan src --project || echo "tastemaker not available from the registry; run it locally"

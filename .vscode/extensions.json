@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-toolsai.jupyter",
+    "ms-toolsai.datawrangler",
+    "charliermarsh.ruff",
+    "bradlc.vscode-tailwindcss",
+    "dbaeumer.vscode-eslint",
+    "anthropic.claude-code"
+  ]
+}
